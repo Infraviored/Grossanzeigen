@@ -1,6 +1,10 @@
 # IMPORTANT!!
 All agents must read this file first, then follow your respective `agent-*.md` file. Do not change shared contracts without updating this file and notifying all agents.
 
+
+
+We have the following problem. Please note that all the agents will run in parallel, so the agents must behave in a way that they do not decept each other and destroy their workflows. All the agents must work in a way they coexist rather than competing. You are an agent. It could be that... Another agent is editing some of the files. Do not run the NPM procedure of building or running as this would decept another. When you are at a point where this should be done, tell me and I will do it.
+
 ## Global Goal — Recreate eBay (90% parity) fast with 5 AI agents
 
 ### Mission

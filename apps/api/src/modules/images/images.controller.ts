@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, BadRequestException, Delete, Param, ForbiddenException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SessionAuthGuard } from '../auth/session.guard.js';
@@ -12,6 +12,16 @@ class PresignDto {
 class AttachImageDto {
   key!: string;
   orderIndex!: number;
+}
+
+class ReorderImageDto {
+  id!: string;
+  orderIndex!: number;
+}
+
+class ReorderDto {
+  listingId!: string;
+  order!: ReorderImageDto[];
 }
 
 @Controller('images')
@@ -48,6 +58,33 @@ export class ImagesController {
       select: { id: true, listingId: true, orderIndex: true, s3KeyOriginal: true },
     });
     return { image: created };
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Post('reorder')
+  async reorder(@Body() dto: ReorderDto, req: any) {
+    const listing = await this.prisma.listing.findUnique({ where: { id: dto.listingId }, select: { sellerId: true } });
+    if (!listing || listing.sellerId !== req.user.userId) throw new ForbiddenException('Not your listing');
+    await this.prisma.$transaction(
+      dto.order.map((o) =>
+        this.prisma.listingImage.update({ where: { id: o.id }, data: { orderIndex: o.orderIndex } }),
+      ),
+    );
+    return { success: true } as const;
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Delete(':id')
+  async remove(@Param('id') id: string, req: any) {
+    const img = await this.prisma.listingImage.findUnique({ where: { id }, select: { id: true, listingId: true, orderIndex: true, listing: { select: { sellerId: true } } } as any });
+    if (!img) throw new BadRequestException('Image not found');
+    if (img.listing.sellerId !== req.user.userId) throw new ForbiddenException('Not your listing');
+    await this.prisma.listingImage.delete({ where: { id } });
+    const remaining = await this.prisma.listingImage.findMany({ where: { listingId: img.listingId }, select: { id: true }, orderBy: { orderIndex: 'asc' } });
+    await this.prisma.$transaction(
+      remaining.map((r, idx) => this.prisma.listingImage.update({ where: { id: r.id }, data: { orderIndex: idx } })),
+    );
+    return { success: true } as const;
   }
 }
 

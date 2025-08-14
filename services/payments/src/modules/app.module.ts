@@ -11,6 +11,7 @@ import { PayoutsController } from '../routes/payouts.controller';
 import { ReceiptsController } from '../routes/receipts.controller';
 import { ReceiptsService } from '../services/receipts.service';
 import { IdempotencyService } from '../services/idempotency.service';
+import { WebhookForwarderService } from '../services/webhook-forwarder.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { IdempotencyService } from '../services/idempotency.service';
     StripeModule,
   ],
   controllers: [HealthController, PaymentIntentsController, FeesController, WebhooksController, RefundsController, PayoutsController, ReceiptsController],
-  providers: [RefundsService, ReceiptsService, IdempotencyService],
+  providers: [RefundsService, ReceiptsService, IdempotencyService, WebhookForwarderService],
 })
 export class AppModule {}
 

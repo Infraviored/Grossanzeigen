@@ -2,6 +2,7 @@ import { Body, Controller, Post, UseGuards, BadRequestException } from '@nestjs/
 import crypto from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SessionAuthGuard } from '../auth/session.guard.js';
+import { ImageModerationService } from '../moderation/image.service.js';
 
 class PresignDto {
   mimeType!: string;
@@ -15,7 +16,7 @@ class AttachImageDto {
 
 @Controller('images')
 export class ImagesController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly imageMod: ImageModerationService) {}
 
   @UseGuards(SessionAuthGuard)
   @Post('presign')
@@ -26,9 +27,8 @@ export class ImagesController {
     return { uploadUrl, key, maxSize: dto.maxSize ?? 10 * 1024 * 1024, mimeTypes: [dto.mimeType] };
   }
 
-  private async moderateImagePlaceholder(_key: string): Promise<{ blocked: boolean; reason?: string }> {
-    // Placeholder: integrate provider later
-    return { blocked: false };
+  private async moderateImagePlaceholder(key: string): Promise<{ blocked: boolean; reason?: string }> {
+    return await this.imageMod.checkByStorageKey(key);
   }
 
   @UseGuards(SessionAuthGuard)

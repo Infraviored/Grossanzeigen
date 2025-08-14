@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { StripeService } from '../services/stripe.service';
 import { IdempotencyService } from '../services/idempotency.service';
+import { WebhookForwarderService } from '../services/webhook-forwarder.service';
 
 @Controller('payments/stripe/webhook')
 export class WebhooksController {
   private readonly webhookSecret?: string;
   private readonly stripe: Stripe;
 
-  constructor(private readonly config: ConfigService, private readonly stripeService: StripeService, private readonly idem: IdempotencyService) {
+  constructor(private readonly config: ConfigService, private readonly stripeService: StripeService, private readonly idem: IdempotencyService, private readonly forwarder: WebhookForwarderService) {
     this.webhookSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET') || undefined;
     // reuse underlying client to ensure same API version
     // StripeService doesn't expose client publicly; create a local one for webhook verification if needed
@@ -37,11 +38,21 @@ export class WebhooksController {
 
     switch (event.type) {
       case 'payment_intent.succeeded':
+        await this.forwarder.forwardUpdate(this.config.get('API_BASE_URL') || 'http://localhost:3001', {
+          orderId: (event.data.object as any)?.metadata?.orderId,
+          payment: { intentId: (event.data.object as any)?.id, status: 'succeeded' },
+        });
+        break;
       case 'payment_intent.payment_failed':
+        await this.forwarder.forwardUpdate(this.config.get('API_BASE_URL') || 'http://localhost:3001', {
+          orderId: (event.data.object as any)?.metadata?.orderId,
+          payment: { intentId: (event.data.object as any)?.id, status: 'canceled' },
+        });
+        break;
       case 'charge.refunded':
       case 'charge.dispute.created':
       case 'charge.dispute.closed':
-        // TODO: emit domain events / call API later
+        // TODO: forward with more details
         break;
       default:
         break;

@@ -1,11 +1,12 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { MessagesService } from './messages.service.js';
 import { SessionAuthGuard } from '../auth/session.guard.js';
-// import { RateLimitGuard } from '../ratelimit/ratelimit.guard.js';
+import { RateLimitGuard } from '../ratelimit/ratelimit.guard.js';
+import { SoftBanGuard } from '../moderation/softban.guard.js';
 
 class SendMessageDto { conversationId!: string; text!: string }
 
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, RateLimitGuard, SoftBanGuard)
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messages: MessagesService) {}

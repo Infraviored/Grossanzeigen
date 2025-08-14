@@ -40,6 +40,11 @@ Provide baseline protections for users and the platform: content moderation, abu
 - [x] Flag message to reports when triggered (routes to audit/log queue)
 - [ ] Acceptance: flagged text routes to review queue
 
+### Step 8 — Fraud & spam heuristics (MVP)
+- [ ] Signals and scoring service scaffold
+- [ ] Apply throttles or manual review based on score
+- [ ] Acceptance: obvious spam accounts are slowed or blocked
+
 ### Step 6 — Reporting & takedown
 - [x] Endpoint for users to report listings/users/messages with reasons
 - [x] Moderation queue: triage and resolve with actions (remove, warn, ban)

@@ -50,6 +50,7 @@ Enable buyers to pay securely and sellers to receive payouts. Implement order li
 - [x] Idempotent processing table (in-memory placeholder)
 - [x] Handle events stubs: payment_intent.succeeded/failed, charge.refunded, charge.dispute.created/closed
 - [ ] Acceptance: replaying webhook events updates order idempotently
+- [x] Forward successful/failed intents to API internal endpoint for persistence
 
 ### Step 8 — Payouts to sellers
 - [ ] Transfer funds to seller's Connect account less fees; allow scheduled payouts
@@ -85,6 +86,7 @@ Enable buyers to pay securely and sellers to receive payouts. Implement order li
 - [ ] Document endpoints and payload contracts consumed by Backend API
 - [ ] Provide example payloads for UI fee breakdown and order timeline
 - [ ] Acceptance: `README-payments.md` present with examples
+  - [ ] Add `/payments/fees/quote`, `/payments/intent`, `/payments/stripe/customers/init`, `/payments/stripe/connect/*` examples
 
 ---
 

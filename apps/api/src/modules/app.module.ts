@@ -15,10 +15,13 @@ import { MessagingModule } from './messaging/messaging.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SearchEventsModule } from './search-events/search-events.module.js';
+import { PaymentsIntegrationModule } from './payments-integration/payments-integration.module.js';
 import { AlertsModule } from './alerts/alerts.module.js';
+import { DocsModule } from './docs/docs.module.js';
+import { EmailModule } from './email/email.module.js';
 
 @Module({
-  imports: [HealthModule, PoliciesModule, PrismaModule, AuthModule, MeModule, UsersModule, CategoriesModule, ListingsModule, ModerationModule, DisputesModule, PrivacyModule, ImagesModule, MessagingModule, NotificationsModule, OrdersModule, SearchEventsModule, AlertsModule],
+  imports: [HealthModule, PoliciesModule, PrismaModule, AuthModule, MeModule, UsersModule, CategoriesModule, ListingsModule, ModerationModule, DisputesModule, PrivacyModule, ImagesModule, MessagingModule, NotificationsModule, OrdersModule, SearchEventsModule, AlertsModule, PaymentsIntegrationModule, DocsModule, EmailModule],
 })
 export class AppModule {}
 

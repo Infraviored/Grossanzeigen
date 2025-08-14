@@ -1,3 +1,35 @@
+import Link from "next/link";
+
+export default function HomePage() {
+	return (
+		<div className="mx-auto max-w-6xl px-4 py-10">
+			<section className="grid gap-8 md:grid-cols-2 md:items-center">
+				<div>
+					<h1 className="text-3xl font-semibold">Buy and sell locally with confidence</h1>
+					<p className="mt-3 text-gray-600">Search millions of listings or post your own in minutes.</p>
+					<form action="/search" method="get" className="mt-6 flex gap-2">
+						<input name="q" className="h-10 w-full rounded border border-gray-300 px-3 text-sm" placeholder="Search for anything" />
+						<button type="submit" className="h-10 rounded bg-black px-4 text-sm text-white">Search</button>
+					</form>
+					<div className="mt-4 flex gap-3">
+						<Link href="/sell" className="rounded bg-black px-4 py-2 text-white">Start selling</Link>
+						<Link href="/search" className="rounded border px-4 py-2">Browse</Link>
+					</div>
+				</div>
+				<div className="aspect-video w-full rounded bg-gray-100" />
+			</section>
+			<section className="mt-12">
+				<h2 className="text-xl font-semibold">Popular categories</h2>
+				<div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+					<Link href="/search?category=electronics" className="rounded border p-4 text-center">Electronics</Link>
+					<Link href="/search?category=home" className="rounded border p-4 text-center">Home</Link>
+					<Link href="/search?category=fashion" className="rounded border p-4 text-center">Fashion</Link>
+					<Link href="/search?category=motors" className="rounded border p-4 text-center">Motors</Link>
+				</div>
+			</section>
+		</div>
+	);
+}
 import Image from "next/image";
 
 export default function Home() {

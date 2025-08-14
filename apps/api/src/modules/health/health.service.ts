@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { Client as OpenSearchClient } from '@opensearch-project/opensearch';
 
 type DependencyStatus = {
   name: string;
@@ -19,6 +20,14 @@ export class HealthService {
       dependencies.push({ name: 'db', status: 'up' });
     } catch {
       dependencies.push({ name: 'db', status: 'down' });
+    }
+
+    try {
+      const os = new OpenSearchClient({ node: process.env.OPENSEARCH_URL ?? 'http://localhost:9200' });
+      await os.ping();
+      dependencies.push({ name: 'opensearch', status: 'up' });
+    } catch {
+      dependencies.push({ name: 'opensearch', status: 'down' });
     }
 
     return {

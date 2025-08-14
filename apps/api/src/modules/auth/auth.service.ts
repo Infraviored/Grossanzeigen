@@ -2,10 +2,11 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { PrismaService } from '../prisma/prisma.service.js';
 import argon2 from 'argon2';
 import crypto from 'node:crypto';
+import { EmailService } from '../email/email.service.js';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly email: EmailService) {}
 
   async signup(email: string, password: string) {
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -22,7 +23,8 @@ export class AuthService {
       select: { id: true, email: true, roles: true, createdAt: true },
     });
     // Issue verification token (24h)
-    await this.createVerificationToken(user.id);
+    const { token } = await this.createVerificationToken(user.id);
+    await this.email.sendVerificationEmail(user.email, token);
     return user;
   }
 
@@ -47,7 +49,7 @@ export class AuthService {
       const existingDevice = await this.prisma.device.findFirst({ where: { userId: user.id, identifier: deviceIdentifier } });
       if (!existingDevice) {
         await this.prisma.device.create({ data: { userId: user.id, identifier: deviceIdentifier } });
-        // TODO: send email notification about new login/device (placeholder)
+        await this.email.sendUnusualLoginEmail(user.email, { ip: ipAddress, ua: userAgent });
       }
     }
     return { user: { id: user.id, email: user.email, roles: user.roles }, session };

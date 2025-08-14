@@ -6,5 +6,6 @@ export interface Payment {
     marketplace_fee?: number; // minor units
     processing_fee?: number; // minor units
   };
+  stripe_charge_id?: string;
 }
 

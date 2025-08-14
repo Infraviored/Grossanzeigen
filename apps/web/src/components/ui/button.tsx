@@ -1,4 +1,4 @@
-import { cn } from '@/src/lib/cn';
+import { cn } from '@/lib/cn';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost';

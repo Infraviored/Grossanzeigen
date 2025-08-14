@@ -1,6 +1,18 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, UnauthorizedException, Req } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { Body, Controller, Delete, Get, Put, UseGuards, HttpCode, HttpStatus, Param, UnauthorizedException, Req } from '@nestjs/common';
+import { IsOptional, IsString, IsUrl } from 'class-validator';
 import type { Request } from 'express';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { SessionAuthGuard } from '../auth/session.guard.js';
+
+class ProfileUpdateDto {
+  @IsOptional() @IsString() displayName?: string;
+  @IsOptional() @IsUrl({ require_tld: false }) avatarUrl?: string | null;
+  @IsOptional() @IsString() bio?: string | null;
+}
+
+class AddressesUpdateDto {
+  addresses!: unknown;
+}
 
 function parseSessionTokenFromRequest(req: Request): string | undefined {
   const cookieHeader = req.headers['cookie'];
@@ -10,9 +22,54 @@ function parseSessionTokenFromRequest(req: Request): string | undefined {
   return decodeURIComponent(match.substring('session='.length));
 }
 
+@UseGuards(SessionAuthGuard)
 @Controller('me')
 export class MeController {
   constructor(private readonly prisma: PrismaService) {}
+
+  @Get()
+  async getMe(req: any) {
+    const userId: string = req.user.userId;
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, roles: true, createdAt: true, profile: true },
+    });
+    return { user };
+  }
+
+  @Get('profile')
+  async getProfile(req: any) {
+    const userId: string = req.user.userId;
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: { userId: true, displayName: true, avatarUrl: true, bio: true, addresses: true },
+    });
+    return { profile };
+  }
+
+  @Put('profile')
+  async updateProfile(@Body() dto: ProfileUpdateDto, req: any) {
+    const userId: string = req.user.userId;
+    const profile = await this.prisma.profile.upsert({
+      where: { userId },
+      update: { displayName: dto.displayName, avatarUrl: dto.avatarUrl ?? null, bio: dto.bio ?? null },
+      create: { userId, displayName: dto.displayName ?? 'User', avatarUrl: dto.avatarUrl ?? null, bio: dto.bio ?? null },
+      select: { userId: true, displayName: true, avatarUrl: true, bio: true },
+    });
+    return { profile };
+  }
+
+  @Put('addresses')
+  async updateAddresses(@Body() dto: AddressesUpdateDto, req: any) {
+    const userId: string = req.user.userId;
+    const profile = await this.prisma.profile.upsert({
+      where: { userId },
+      update: { addresses: dto.addresses as any },
+      create: { userId, displayName: 'User', addresses: dto.addresses as any },
+      select: { userId: true, addresses: true },
+    });
+    return { profile };
+  }
 
   @Get('sessions')
   async listSessions(@Req() req: Request) {

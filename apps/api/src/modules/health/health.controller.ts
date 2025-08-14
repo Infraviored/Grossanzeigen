@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { metricsStore } from '../common/metrics.store.js';
 import { HealthService } from './health.service.js';
 
 @Controller('health')
@@ -8,6 +9,11 @@ export class HealthController {
   @Get()
   getHealth() {
     return this.healthService.getHealthStatus();
+  }
+
+  @Get('metrics')
+  getMetrics() {
+    return { http: metricsStore.summarize() };
   }
 }
 

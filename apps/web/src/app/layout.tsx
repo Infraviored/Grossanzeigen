@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ToastContainer } from "@/components/ui/toast";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,7 +39,7 @@ export default function RootLayout({
           </div>
         </header>
         <main className="flex-1">
-          {children}
+          <Providers>{children}</Providers>
         </main>
         <footer className="border-t">
           <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-gray-500">
@@ -52,7 +54,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        <div id="toasts-root" />
+        <ToastContainer />
       </body>
     </html>
   );

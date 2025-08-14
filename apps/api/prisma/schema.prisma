@@ -33,6 +33,12 @@ enum OrderState {
   DISPUTED
 }
 
+enum EnforcementType {
+  SOFT_BAN
+  HARD_BAN
+  SHADOW_BAN
+}
+
 // Core: Users & Auth
 model User {
   id           String    @id @default(uuid())
@@ -42,6 +48,11 @@ model User {
   emailVerifiedAt DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  // Payments (Agent 4)
+  stripeCustomerId String? @unique
+  stripeAccountId  String? @unique
+  connectOnboardingStatus String?
 
   profile      Profile?
   sessions     Session[]
@@ -59,6 +70,7 @@ model User {
   savedSearches      SavedSearch[]
   reports            Report[]
   auditLogs          AuditLog[]
+  enforcements       Enforcement[]
 }
 
 model Profile {
@@ -261,6 +273,9 @@ model Payment {
   stripePaymentIntentId    String?
   status                   String
   fees                     Int?
+  applicationFeeMinor      Int?
+  processingFeeMinor       Int?
+  stripeChargeId           String?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
@@ -358,6 +373,21 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   actor     User?    @relation(fields: [actorId], references: [id])
+}
+
+model Enforcement {
+  id        String           @id @default(uuid())
+  userId    String
+  type      EnforcementType
+  reason    String?
+  until     DateTime?
+  active    Boolean          @default(true)
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([active])
 }
 
 // Search Outbox

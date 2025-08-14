@@ -1,13 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
+import { FeesService } from './fees.service';
 
 @Injectable()
 export class StripeService {
   private readonly client: Stripe;
   private readonly hasApiKey: boolean;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(private readonly config: ConfigService, private readonly fees: FeesService) {
     const apiKey = this.config.get<string>('STRIPE_SECRET_KEY');
     const apiVersion = (this.config.get<string>('STRIPE_API_VERSION') || '2024-06-20') as Stripe.LatestApiVersion | undefined;
     if (!apiKey) {
@@ -96,6 +97,51 @@ export class StripeService {
       type: 'account_onboarding',
     });
     return link;
+  }
+
+  async createPaymentIntent(params: {
+    orderId: string;
+    amountMinor: number;
+    currency: string;
+    buyerStripeCustomerId?: string;
+    sellerStripeAccountId?: string;
+    applicationFeeMinor?: number;
+    captureMethod?: 'automatic' | 'manual';
+    requestThreeDSecure?: 'automatic' | 'any';
+  }) {
+    if (!this.hasApiKey) {
+      throw new HttpException(
+        { error: { code: 'PAYMENTS_NOT_CONFIGURED', message: 'Stripe is not configured. Set STRIPE_SECRET_KEY.' } },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    const computedFees =
+      typeof params.applicationFeeMinor === 'number' ? null : this.fees.quote(params.amountMinor);
+    const applicationFeeMinor =
+      typeof params.applicationFeeMinor === 'number' ? params.applicationFeeMinor : computedFees?.applicationFeeMinor;
+
+    const intent = await this.client.paymentIntents.create({
+      amount: params.amountMinor,
+      currency: params.currency.toLowerCase(),
+      customer: params.buyerStripeCustomerId,
+      capture_method: params.captureMethod || 'automatic',
+      metadata: { orderId: params.orderId },
+      payment_method_options: {
+        card: {
+          request_three_d_secure: params.requestThreeDSecure || 'automatic',
+        },
+      },
+      ...(params.sellerStripeAccountId || applicationFeeMinor
+        ? {
+            application_fee_amount: applicationFeeMinor || undefined,
+            transfer_data: params.sellerStripeAccountId
+              ? { destination: params.sellerStripeAccountId }
+              : undefined,
+          }
+        : {}),
+    });
+    return intent;
   }
 }
 

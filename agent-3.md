@@ -66,7 +66,7 @@ Design the relational schema, implement migrations and seeds, stand up search wi
 - Generate realistic attribute values; random geos within a bounding box
 - Acceptance: after seed, app has 1k+ listings for testing
 
-### Step 12 — OpenSearch cluster and indices
+### [x] Step 12 — OpenSearch cluster and indices
 - Create indices: `listings`, `sellers`
 - Mappings: text fields with analyzers, keyword for exact, numeric for facets, geo_point for location
 - Acceptance: indices exist with expected mappings
@@ -90,7 +90,7 @@ Design the relational schema, implement migrations and seeds, stand up search wi
 - Configure aggregations for category, condition, price ranges
 - Acceptance: UI receives facet counts consistent with hits
 
-### Step 17 — Reindexing
+### [x] Step 17 — Reindexing
 - Full reindex job with alias swap (listings_v1 → listings_v2)
 - Progress logging; throttle to protect cluster
 - Acceptance: reindex completes, zero-downtime alias switch works
@@ -100,12 +100,18 @@ Design the relational schema, implement migrations and seeds, stand up search wi
 - Lifecycle policies (e.g., transition to infrequent access later)
 - Acceptance: objects can be uploaded via presigned URLs and read via CDN
 
-### Step 19 — Image processing pipeline
+### [x] Step 19 — Image processing pipeline
 - Worker to resize to presets (thumb, medium, large) and write to processed bucket
 - Store processed variants in DB and mark readiness
 - Acceptance: uploaded image results in available variants
 
-### Step 20 — Backups & basic maintenance
+### [ ] Step 20 — Backups & basic maintenance
+---
+
+### Immediate next steps (aligned with current repo)
+- Provide a small seed set for `categories` and a dozen `listings` so Agent 1 can render search quickly.
+- Deliver a lightweight ingestion daemon that drains `SearchOutbox` on interval (uses `apps/api/src/scripts/ingest-outbox.ts`).
+- Document OpenSearch env in `.env` (e.g., `OPENSEARCH_NODE`, username/password) and ensure health uses those.
 - Enable automated DB backups and document restore procedure (note only)
 - Provide vacuum/analyze schedule guidance; index bloat checks
 - Acceptance: scripts/docs exist in repo `db/README.md`

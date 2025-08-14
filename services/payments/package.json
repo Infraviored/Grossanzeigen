@@ -7,7 +7,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
-    "lint": "echo 'No linter configured yet'"
+    "lint": "echo 'No linter configured yet'",
+    "reconcile": "ts-node src/scripts/reconcile.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -17,7 +18,8 @@
     "dotenv": "^16.4.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "stripe": "^16.6.0"
+    "stripe": "^16.6.0",
+    "pdfkit": "^0.15.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",

@@ -33,3 +33,4 @@ Thumbs.db
 **/.cache/
 **/.vercel/
 **/.swc/
+**/node_modules/

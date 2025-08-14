@@ -5,6 +5,9 @@ export interface User {
   email: string;
   roles: Role[];
   created_at: string; // ISO 8601 UTC
+  stripe_customer_id?: string;
+  stripe_account_id?: string;
+  connect_onboarding_status?: string;
 }
 
 export interface Profile {
